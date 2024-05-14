@@ -1,0 +1,12 @@
+sudo apt-get update
+sudo apt-get upgrade
+——————————————
+OPEN CV 
+
+sudo apt install libxdamage1 libssh-gcrypt-4 libxinerama1 libxrandr2 libharfbuzz0b libxfixes3 libwayland-egl1 libwayland-client0 libatk1.0-0 libzvbi0 libwebp6 libwavpack1 libsnappy1v5 libvpx5 libpango-1.0-0 libtiff5 libcroco3 libvorbisenc2 libilmbase23 libxcursor1 libmpg123-0 libaom0 libswresample3 libspeex1 libepoxy0 libmp3lame0 libxvidcore4 libaec0 libopenjp2-7 libchromaprint1 libhdf5-103 libxcomposite1 libopus0 libvdpau1 libwebpmux3 libatk-bridge2.0-0 libatspi2.0-0 libxi6 libpixman-1-0 libgme0 libthai0 libopenmpt0 libavcodec58 libshine3 libavformat58 libpangoft2-1.0-0 libx264-155 libswscale5 libgraphite2-3 libva-drm2 libgsm1 libjbig0 libwayland-cursor0 libtheora0 libsz2 libogg0 libvorbisfile3 libgtk-3-0 libxcb-shm0 libx265-165 libopenexr23 libcodec2-0.8.1 libcairo-gobject2 libxcb-render0 libsoxr0 libxrender1 libfontconfig1 libdatrie1 libva-x11-2 libatlas3-base libgfortran5 libcairo2 libdrm2 libvorbis0a librsvg2-2 libxkbcommon0 libbluray2 libpangocairo-1.0-0 libva2 libgdk-pixbuf2.0-0 libtwolame0 libavutil56
+
+pip3 install opencv-contrib-python==4.5.5.62
+
+————————————
+
+pip3 install numpy
