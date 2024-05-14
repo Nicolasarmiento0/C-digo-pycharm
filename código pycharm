@@ -1,0 +1,245 @@
+import cv2
+import numpy as np
+import os
+from tkinter import *
+from PIL import Image, ImageTk
+import imutils
+import math
+import mediapipe as mp
+
+#Log Biometric
+
+def Log_Biometric():
+    global pantalla2, conteo, parpadeo, img_info, step, cap, lblVideo
+
+    #Verificar si hay video
+
+
+def Log_Biometric():
+    global pantalla2, conteo, parpadeo, img_info, step, cap, lblVideo
+
+    # Verificar si hay video
+    if cap is not None:
+        ret, frame = cap.read()
+        # Verificar si la captura de video fue exitosa (ret == True)
+        if ret:
+            # Resize
+            frame = imutils.resize(frame, width=1280)
+
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            if ret == True:
+                #Inferencia de la malla facila
+                res = Facemesh.process(frameRGB)
+
+                px = []
+                py = []
+                lista = []
+                if res.multi_face_landmarks:
+                    #Extraelas
+                    for rostros in res.multi_face_landmarks:
+                        mpDraw.draw_landmarks(frame, rostros, FacemeshObject.FACEMESH_CONTOURS, ConfigDraw, ConfigDraw)
+                        #Extraer puntos
+                        for id, puntos in enumerate(rostros.landmark):
+                            #inf img
+                            al, an, c = frame.shape
+                            x, y = int(puntos.x * an), int (puntos.y * al)
+                            px.append(x)
+                            py.append(y)
+                            lista.append([id,x,y])
+
+                            if len (lista) == 468:
+                                #ojo der
+                                x1,y1 = lista[145][1:]
+                                x2,y2 = lista[159][1:]
+                                longitud1 = math.hypot(x2-x1, y2-y1)
+
+                                #ojo izq
+                                x3, y3 = lista[374][1:]
+                                x4, y4 = lista[386][1:]
+                                longitud2 = math.hypot(x4 - x3, y4 - y3)
+
+
+                                #cv2.circle(frame, (x1,y1),2,(255,0,0), cv2.FILLED)
+                                #cv2.circle(frame, (x2, y2), 2, (255, 0, 0), cv2.FILLED)
+
+                                #Face detect
+                                faces = detector.process(frameRGB)
+
+                                if faces.detections is not None:
+                                    for face in faces.detections:
+                                        score =  faces.score
+                                        score = score[0]
+                                        bbox = face.location_data.relative_bounding_box
+
+                                        if score > confThreshold:
+                                            xi, yi, anc , alt = bbox.xmin, bbox.ymin, bbox.width, bbox.height
+                                            xi, yi, anc, alt = int(xi * an), int(yi * al), int(anc * an), int(alt * al)
+                                            
+
+
+
+
+
+
+
+
+
+            # Convertir video
+            im = Image.fromarray(frame)
+            img = ImageTk.PhotoImage(image=im)
+
+            # Mostrar Video
+            lblVideo.configure(image=img)
+            lblVideo.image = img
+            lblVideo.after(10, Log_Biometric)
+        else:
+            cap.release()
+    else:
+        cap.release()
+
+
+#Funcion
+def Log():
+    global RegName, RegUser, RegPass, InputNameReg, InputUserReg, InputPassReg, cap, lblVideo, pantalla2
+    #Extraer :Nombre - Usuario - Contraseña
+    RegName, RegUser, RegPass = InputNameReg.get(), InputUserReg.get(), InputPassReg.get()
+
+    #Si el formulario esta incompleto
+    if len(RegName) == 0 or len(RegUser) == 0 or len(RegPass) == 0:
+        print("UPS, FORMULARIO INCOMPLETO")
+    else:
+
+        UserList = os.listdir(PathUserCheck)
+
+
+        UserName = []
+
+        for lis in UserList:
+        #Extraer Usuario
+            User = lis
+            User = User.split('.')
+        #Save User
+            UserName.append(User[0])
+
+    #Chek User
+    if RegUser in UserName:
+        print("YA EXISTE UN(a) TITAN CON ESE NOMBRE")
+
+    else:
+        #Save Info
+        info.append(RegName)
+        info.append(RegUser)
+        info.append(RegPass)
+
+        #Exportar Info
+        f = open(f"{OutFolderPathUser}/{RegUser}.txt","w")
+        f.write(RegName + ',')
+        f.write(RegUser + ',')
+        f.write(RegPass)
+        f.close()
+
+        #Clean
+        InputNameReg.delete(0,END)
+        InputUserReg.delete(0,END)
+        InputPassReg.delete(0,END)
+
+        #Nueva PANTALLA
+        pantalla2=Toplevel(pantalla)
+        pantalla2.title("RECONOCIMIENTO BIOMETRICO")
+        pantalla2.geometry("1280x720")
+
+        lblVideo = Label(pantalla2)
+        lblVideo.place(x=0, y=0)
+
+        cap = cv2.VideoCapture(0)
+        cap.set(3, 1280)
+        cap.set(4,720)
+
+        Log_Biometric()
+
+
+def Sign():
+    print("Inacap")
+
+
+
+#Path
+OutFolderPathUser = '/Users/nicolassarmiento/PycharmProjects/pythonProject/DataBase/Usuarios'
+PathUserCheck = '/Users/nicolassarmiento/PycharmProjects/pythonProject/DataBase/Usuarios/'
+OutFolderPathFace = '/Users/nicolassarmiento/PycharmProjects/pythonProject/DataBase/Rostros'
+
+#Variables
+parpadeo = False
+conteo = 0
+muestra = 0
+step = 0
+
+#Offset
+offsety = 30
+offsstx = 20
+
+#Umbral
+confThreshold = 0.5
+
+#Draw
+
+mpDraw = mp.solutions.drawing_utils
+ConfigDraw = mpDraw.DrawingSpec(thickness=1, circle_radius=1)
+
+#Malla
+
+FacemeshObject = mp.solutions.face_mesh
+Facemesh = FacemeshObject.FaceMesh(max_num_faces=1)
+
+#Detector de rostros
+
+FaceObject = mp.solutions.face_detection
+detector = FaceObject.FaceDetection(min_detection_confidence=0.5, model_selection=1)
+
+
+#Info lis
+info = []
+
+#Ventana Principal
+pantalla = Tk()
+pantalla.title('BIENVENIDOS A TITAN TRAINER')
+pantalla.geometry =('1280x720')
+
+#Imagen de Fondo
+imagenF = PhotoImage(file="/Users/nicolassarmiento/PycharmProjects/pythonProject/DataBase/Setup/inicio.png")
+background = Label(image = imagenF, text = "Inicio")
+background.place(x=0, y=0, relheight=1, relwidth=1)
+
+#Input Texto Registro
+InputNameReg = Entry(pantalla)
+InputNameReg.place(x=110 , y = 320)
+
+InputUserReg = Entry(pantalla)
+InputUserReg.place(x=110 , y = 430)
+
+InputPassReg = Entry(pantalla)
+InputPassReg.place(x=110 , y = 540)
+
+#Input Texto Sign up
+InputUserLog = Entry(pantalla)
+InputUserLog.place(x=750 , y = 380)
+
+InputPassLog = Entry(pantalla)
+InputPassLog.place(x=750 , y = 500)
+
+
+#Boton Log
+imagenBR = PhotoImage(file="/Users/nicolassarmiento/PycharmProjects/pythonProject/DataBase/Setup/BtLogin.png")
+BtReg = Button(pantalla, text="Registro", image=imagenBR, height="40",width="200", command=Log)
+BtReg.place(x=300, y=580)
+
+#Boton Sig
+imagenBl = PhotoImage(file="/Users/nicolassarmiento/PycharmProjects/pythonProject/DataBase/Setup/BtSign.png")
+BtSign = Button(pantalla, text="Registro", image=imagenBl, height="40",width="200", command=Sign)
+BtSign.place(x=900, y=580)
+
+
+pantalla.mainloop()
